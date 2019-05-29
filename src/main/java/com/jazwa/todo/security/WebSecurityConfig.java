@@ -3,6 +3,7 @@ package com.jazwa.todo.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -22,7 +23,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth
                 .inMemoryAuthentication()
                 .withUser("rambo")
-                .password("john")
+                .password(bcrypt().encode("john"))
                 .roles("ADMIN")
                 .and()
                 .passwordEncoder(bcrypt());
@@ -34,9 +35,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().disable()
                 .and()
                 .authorizeRequests()
-                .anyRequest()
-                .permitAll()
+                .antMatchers(HttpMethod.DELETE).authenticated()
+                .antMatchers("/todos").permitAll()
+                .antMatchers("/todos/*").authenticated()
                 .and()
-                .formLogin();
+                .httpBasic();
     }
 }
